@@ -4,13 +4,13 @@ const bodyParser = require('body-parser');
 
 let db = new sqlite3.Database('./mydb.db', (err)=> {
     if(err) {
-        console.log(err.message)
+        console.log(err.message);
     }
-    console.log('connected to my db in sqlite')
+    console.log('connected to my db in sqlite');
 
     // db.close((err)=> {
     //     if(err) {
-    //         console.log(err.message)
+    //         console.log(err.message);
     //     }
     // })
 
@@ -20,20 +20,20 @@ let db = new sqlite3.Database('./mydb.db', (err)=> {
 
 const app = express();
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 //Get all Resources
 app.get('/resources', (req, res) => {
     
     db.all('SELECT * FROM resources', [], (err, rows) => {
         if (err) {
-          throw err;
+            console.log(err.message)
         }
         rows.forEach((row) => {
           console.log(row);
         });
         res.json(rows);
-    })
+    });
 })
 
 // Get a particular resource
@@ -70,7 +70,7 @@ app.post('/resources', (req, res)=> {
     db.run(`INSERT INTO resources(resource_id, resource_name) VALUES(?, ?)`, [req.body.resource_id, req.body.resource_name], function(err) {
         if (err) {
             res.json('Something went wrong').status(400);
-            return console.log(err.message);
+            return console.error(err.message);
         }
         // get the last insert id
         console.log(`A row has been inserted with rowid ${this.lastID}`);
@@ -135,7 +135,7 @@ app.delete('/reservations/:id', (req, res)=> {
       });
 })
 
-// Insert a particular resource
+// Insert a particular reservation
 app.post('/reservations', (req, res)=> {
     console.log(req.body);
     db.run(`INSERT INTO reservations(reservation_id, start_date, end_date, resource_id, owner_email, comments) VALUES(?, ?, ?, ?, ?, ?)`, 
@@ -150,7 +150,7 @@ app.post('/reservations', (req, res)=> {
     function(err) {
         if (err) {
             res.json('Something went wrong').status(400);
-            return console.log(err.message);
+            return console.error(err.message);
         }
         // get the last insert id
         console.log(`A row has been inserted with rowid ${this.lastID}`);
@@ -158,7 +158,7 @@ app.post('/reservations', (req, res)=> {
       });
 })
 
-// Update a resource
+// Update a reservation
 app.put('/reservations', (req, res)=> {
     const lookupId = req.body.resource_id;
     // const newName = req.body.resource_name;
@@ -167,13 +167,13 @@ app.put('/reservations', (req, res)=> {
     const query = 'UPDATE reservations SET comments = ? WHERE reservation_id = ?';
     const query2 = 'UPDATE reservations SET start_date = ?, end_date = ?, resource_id = ?, owner_email = ?, comments = ? WHERE reservation_id = ?';
     
-    db.run(query, 
+    db.run(query2, 
     [
-        // req.body.start_date, 
-        // req.body.end_date, 
-        // req.body.resource_id,
-        // req.body.owner_email,
-        "test",
+        req.body.start_date, 
+        req.body.end_date, 
+        req.body.resource_id,
+        req.body.owner_email,
+        req.body.comments,
         lookupId
     ], 
     (err, row) => {
